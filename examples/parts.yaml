@@ -1,5 +1,7 @@
-addresses:
-- localhost:1001
-- localhost:1002
+favourite_shows:
+- South Park
+- Arrested Development
 
 pet:
+    name: Twinkle Toes
+    age: 2

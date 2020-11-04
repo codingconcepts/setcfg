@@ -1,2 +1,4 @@
-addresses: ~addresses~
-pet: ~pet~
+person:
+    name: Rob
+    favourite_shows: ~favourite_shows~
+    pet: ~pet~

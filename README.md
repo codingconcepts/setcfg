@@ -1,8 +1,6 @@
 # ![datagen logo](assets/cover.png)
 
-`sety` (pronounced SET-WHY) allows you to set blobs of arbitrary YAML with other blobs of arbitrary YAML.
-
-Sety will walk a YAML file from top to bottom, replacing any blobs of YAML that appear in the file (at any level).
+`sety` (pronounced SET-WHY) allows you to set blobs of arbitrary YAML with other blobs of arbitrary YAML. It will walk a YAML file from top to bottom, replacing any blobs of YAML that appear in the file (at any level).
 
 ## Installation
 

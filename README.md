@@ -12,8 +12,7 @@ $ go get -u github.com/codingconcepts/sety
 
 ## Usage
 
-Help text:
-
+**Help text**:
 ```
 sety -h
   -i string

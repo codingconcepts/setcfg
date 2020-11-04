@@ -28,7 +28,7 @@ Example:
 
 The following command will place any placeholders found within input.yaml with parts found in parts.yaml:
 
-input.yaml:
+**input.yaml**:
 ``` yaml
 person:
     name: Rob
@@ -36,7 +36,7 @@ person:
     pet: ~pet~
 ```
 
-parts.yaml
+**parts.yaml**
 ``` yaml
 shows:
 - South Park

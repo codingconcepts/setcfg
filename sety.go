@@ -12,7 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var placeholderPattern *regexp.Regexp
+// Initialise a default pattern that finds placeholders that are wrapped in tilde characters.
+// For example: ~hello~
+var placeholderPattern = regexp.MustCompile("~(.*?)~")
 
 func main() {
 	input := flag.String("i", "", "Absolute or relative path to input YAML file.")
@@ -73,6 +75,11 @@ func set(inputFile, partsFile io.Reader) (string, error) {
 func parse(input io.Reader) (map[interface{}]interface{}, error) {
 	var parsed map[interface{}]interface{}
 	err := yaml.NewDecoder(input).Decode(&parsed)
+
+	// If there aren't any parts, just return an empty collection.
+	if err == io.EOF {
+		return map[interface{}]interface{}{}, nil
+	}
 
 	return parsed, err
 }

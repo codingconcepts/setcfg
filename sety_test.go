@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -16,10 +17,40 @@ func TestSet(t *testing.T) {
 		expErr error
 	}{
 		{
-			name:  "single level file without placeholders",
-			input: `a: b`,
-			parts: ``,
-			exp:   `a: b`,
+			name:  "single level with no placeholders",
+			input: "a: b",
+			parts: "",
+			exp:   "a: b\n",
+		},
+		{
+			name:  "single level with no matching placeholders",
+			input: "a: b",
+			parts: "b: c",
+			exp:   "a: b\n",
+		},
+		{
+			name:  "single level with nullifying placeholders",
+			input: "a: ~hello~",
+			parts: "hello:",
+			exp:   "a: null\n",
+		},
+		{
+			name:  "single level with a matching placeholder - string",
+			input: "a: ~hello~",
+			parts: "hello: hi",
+			exp:   "a: hi\n",
+		},
+		{
+			name:  "single level with a matching placeholder - list",
+			input: "a: ~hello~",
+			parts: "hello:\n- 1\n- 2",
+			exp:   "a:\n- 1\n- 2\n",
+		},
+		{
+			name:  "single level with a matching placeholder - map",
+			input: "a: ~hello~",
+			parts: "hello:\n  one: 1\n  two: 2",
+			exp:   "a:\n  one: 1\n  two: 2\n",
 		},
 	}
 
@@ -29,7 +60,7 @@ func TestSet(t *testing.T) {
 			partsReader := strings.NewReader(c.parts)
 
 			output, err := set(inputReader, partsReader)
-			test.Equals(t, c.expErr, err)
+			test.Equals(t, c.expErr, errors.Unwrap(err))
 			if err != nil {
 				return
 			}

@@ -1,0 +1,10 @@
+input:
+    http_server:
+      address: "0.0.0.0:8080"
+      path: /
+      timeout: 5s
+  
+output:
+    kafka:
+        addresses: ~addresses~
+        topic: example

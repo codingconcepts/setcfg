@@ -8,7 +8,7 @@ Sety will walk a YAML file from top to bottom, replacing any blobs of YAML that 
 Sety can currently be installed via the Go toolchain, although a release will be cut and made available soon:
 
 ```
-$ go get -u github.com/codingconcepts/set
+$ go get -u github.com/codingconcepts/sety
 ```
 
 ## Usage
@@ -33,13 +33,13 @@ input.yaml:
 ``` yaml
 person:
     name: Rob
-    favourite_shows: ~favourite_shows~
+    favourite_shows: ~shows~
     pet: ~pet~
 ```
 
 parts.yaml
 ``` yaml
-favourite_shows:
+shows:
 - South Park
 - Arrested Development
 

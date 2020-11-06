@@ -1,20 +1,20 @@
 # ![datagen logo](assets/cover2.png)
 
-`sety` (pronounced SET-WHY) allows you to set blobs of arbitrary YAML with other blobs of arbitrary YAML. It will walk a YAML file from top to bottom, replacing any blobs of YAML that appear in the file (at any level).
+`setcfg` (pronounced SET-CONFIG) allows you to set blobs of arbitrary YAML with other blobs of arbitrary YAML. It will walk a YAML file from top to bottom, replacing any blobs of YAML that appear in the file (at any level).
 
 ## Installation
 
-Sety can currently be installed via the Go toolchain, although a release will be cut and made available soon:
+`setcfg` can currently be installed via the Go toolchain, although a release will be cut and made available soon:
 
 ```
-$ go get -u github.com/codingconcepts/sety
+$ go get -u github.com/codingconcepts/setcfg
 ```
 
 ## Usage
 
 **Help text**:
 ```
-sety -h
+setcfg -h
   -i string
         Absolute or relative path to input YAML file.
   -p string
@@ -47,7 +47,7 @@ pet:
 ```
 
 ```
-$ sety -i input.yaml -p parts.yaml
+$ setcfg -i input.yaml -p parts.yaml
 
 person:
   favourite_shows:

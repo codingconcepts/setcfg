@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codingconcepts/sety/internal/pkg/test"
+	"github.com/codingconcepts/setcfg/internal/pkg/test"
 )
 
 func TestSet(t *testing.T) {

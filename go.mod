@@ -1,4 +1,4 @@
-module github.com/codingconcepts/sety
+module github.com/codingconcepts/setcfg
 
 go 1.15
 

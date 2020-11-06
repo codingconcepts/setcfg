@@ -59,14 +59,14 @@ person:
     name: Twinkle Toes
 ```
 
-Sety outputs to stdout, meaning the results can be piped to a new file or to be included in the results of something like a `kubectl apply` as follows:
+`setcfg` outputs to stdout, meaning the results can be piped to a new file or to be included in the results of something like a `kubectl apply` as follows:
 
 **Pipe to file**:
 ```
-$ sety -i input.yaml -p parts.yaml > output.yaml
+$ setcfg -i input.yaml -p parts.yaml > output.yaml
 ```
 
 **Pipe to kubectl apply**:
 ```
-$ sety -i input.yaml -p parts.yaml | kubectl apply -f -
+$ setcfg -i input.yaml -p parts.yaml | kubectl apply -f -
 ```

@@ -1,4 +1,4 @@
-# ![datagen logo](assets/cover2.png)
+# ![datagen logo](assets/cover.png)
 
 `setcfg` (pronounced SET-CONFIG) allows you to set blobs of arbitrary YAML with other blobs of arbitrary YAML. It will walk a YAML file from top to bottom, replacing any blobs of YAML that appear in the file (at any level).
 

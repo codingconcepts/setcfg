@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -16,60 +17,69 @@ import (
 // For example: ~hello~
 var placeholderPattern = regexp.MustCompile("~(.*?)~")
 
+// A type to hold any number of input arguments to support ad-hoc
+type flagStrings []string
+
+func (fs *flagStrings) String() string {
+	return strings.Join(*fs, ",")
+}
+
+func (fs *flagStrings) Set(value string) error {
+	*fs = append(*fs, value)
+	return nil
+}
+
 func main() {
 	input := flag.String("i", "", "Absolute or relative path to input YAML file.")
 	parts := flag.String("p", "", "Absolute or relative path to the parts YAML file.")
 	pattern := flag.String("pattern", "~(.*?)~", "The regex pattern to use for extracting part keys.")
+
+	adhoc := &flagStrings{}
+	flag.Var(adhoc, "f", "A list of 'key=value' fields to substitute (useful as an alternative to -p if all you're substituting are simple fields).")
+
 	flag.Parse()
 
 	if *input == "" {
 		flag.Usage()
 		os.Exit(2)
 	}
-	if *parts == "" {
-		flag.Usage()
-		os.Exit(2)
-	}
+
 	placeholderPattern = regexp.MustCompile(*pattern)
 
 	inputFile, err := os.Open(*input)
 	if err != nil {
 		log.Fatalf("error reading input file: %v", err)
 	}
-
-	partsFile, err := os.Open(*parts)
-	if err != nil {
-		log.Fatalf("error reading input parts file: %v", err)
-	}
-
-	output, err := set(inputFile, partsFile)
-	if err != nil {
-		log.Fatalf("error setting file: %v", err)
-	}
-
-	fmt.Println(output)
-}
-
-func set(inputFile, partsFile io.Reader) (string, error) {
 	inputParsed, err := parse(inputFile)
 	if err != nil {
-		return "", fmt.Errorf("error unmarshalling input file: %w", err)
-	}
-	partsParsed, err := parse(partsFile)
-	if err != nil {
-		return "", fmt.Errorf("error unmarshalling parts file: %w", err)
+		log.Fatalf("error unmarshalling input file: %v", err)
 	}
 
-	if err = setParsed(inputParsed, partsParsed); err != nil {
-		return "", fmt.Errorf("error setting yaml placeholders: %w", err)
+	partsParsed := map[interface{}]interface{}{}
+	if *parts != "" {
+		partsFile, err := os.Open(*parts)
+		if err != nil {
+			log.Fatalf("error reading input parts file: %v", err)
+		}
+		if partsParsed, err = parse(partsFile); err != nil {
+			log.Fatalf("error unmarshalling parts file: %v", err)
+		}
+	}
+
+	if err := addAdhocFields(partsParsed, adhoc); err != nil {
+		log.Fatalf("error setting adhoc fields: %v", err)
+	}
+
+	if err := setParsed(inputParsed, partsParsed); err != nil {
+		log.Fatalf("error setting file: %v", err)
 	}
 
 	output, err := yaml.Marshal(inputParsed)
 	if err != nil {
-		return "", err
+		log.Fatalf("error marshalling output: %v", err)
 	}
 
-	return string(output), err
+	fmt.Println(string(output))
 }
 
 func parse(input io.Reader) (map[interface{}]interface{}, error) {
@@ -82,6 +92,32 @@ func parse(input io.Reader) (map[interface{}]interface{}, error) {
 	}
 
 	return parsed, err
+}
+
+func addAdhocFields(partsParsed map[interface{}]interface{}, adhoc *flagStrings) error {
+	if adhoc == nil {
+		return nil
+	}
+
+	for _, field := range *adhoc {
+		k, v, err := parseAdhocKeyValue(field)
+		if err != nil {
+			return err
+		}
+
+		partsParsed[k] = v
+	}
+
+	return nil
+}
+
+func parseAdhocKeyValue(field string) (string, string, error) {
+	parts := strings.Split(field, "=")
+	if len(parts) < 2 {
+		return "", "", fmt.Errorf("adhoc fields must be in the format of key=value")
+	}
+
+	return parts[0], parts[1], nil
 }
 
 func setParsed(inputParsed, partsParsed map[interface{}]interface{}) error {

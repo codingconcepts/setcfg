@@ -15,6 +15,8 @@ $ go get -u github.com/codingconcepts/setcfg
 **Help text**:
 ```
 setcfg -h
+  -f value
+        A list of 'key=value' fields to substitute (useful as an alternative to -p if all you're substituting are simple fields).
   -i string
         Absolute or relative path to input YAML file.
   -p string
@@ -76,6 +78,26 @@ credentials:
   password: supersecret
   username: admin
 region: eu-west-1
+subnet_cidrs:
+- 1.2.3.0/25
+- 1.2.3.128/25
+```
+
+You can set ad-hoc fields to override any fields in the parts file:
+```
+$ setcfg -i input.yaml -p parts.yaml -p region=eu-west-2
+
+brokers:
+- broker:
+    host: https://localhost
+    port: 8001
+- broker:
+    host: https://localhost
+    port: 8002
+credentials:
+  password: supersecret
+  username: admin
+region: eu-west-2
 subnet_cidrs:
 - 1.2.3.0/25
 - 1.2.3.128/25

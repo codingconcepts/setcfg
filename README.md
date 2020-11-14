@@ -29,34 +29,56 @@ The following command will place any placeholders found within input.yaml with p
 
 **input.yaml**:
 ``` yaml
-person:
-    name: Rob
-    favourite_shows: ~shows~
-    pet: ~pet~
+region: ~region~
+
+credentials:
+    username: ~username~
+    password: ~password~
+
+brokers:
+    - broker: ~broker-1~
+    - broker: ~broker-2~
+
+subnet_cidrs: ~subnet-cidrs~
 ```
 
 **parts.yaml**
 ``` yaml
-shows:
-- South Park
-- Arrested Development
+region: eu-west-1
 
-pet:
-    name: Twinkle Toes
-    age: 2
+username: admin
+password: supersecret
+
+broker-1:
+    host: https://localhost
+    port: 8001
+
+broker-2:
+    host: https://localhost
+    port: 8002
+
+subnet-cidrs:
+- 1.2.3.0/25
+- 1.2.3.128/25
 ```
 
 ```
 $ setcfg -i input.yaml -p parts.yaml
 
-person:
-  favourite_shows:
-  - South Park
-  - Arrested Development
-  name: Rob
-  pet:
-    age: 2
-    name: Twinkle Toes
+brokers:
+- broker:
+    host: https://localhost
+    port: 8001
+- broker:
+    host: https://localhost
+    port: 8002
+credentials:
+  password: supersecret
+  username: admin
+region: eu-west-1
+subnet_cidrs:
+- 1.2.3.0/25
+- 1.2.3.128/25
 ```
 
 `setcfg` outputs to stdout, meaning the results can be piped to a new file or to be included in the results of something like a `kubectl apply` as follows:

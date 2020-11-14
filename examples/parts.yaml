@@ -1,11 +1,16 @@
-shows:
-- South Park
-- Arrested Development
+region: eu-west-1
 
-pet:
-    name: Twinkle Toes
-    age: 2
+username: admin
+password: supersecret
 
-addresses:
-- localhost:1001
-- localhost:1002
+broker-1:
+    host: https://localhost
+    port: 8001
+
+broker-2:
+    host: https://localhost
+    port: 8002
+
+subnet-cidrs:
+- 1.2.3.0/25
+- 1.2.3.128/25

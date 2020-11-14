@@ -86,29 +86,35 @@ func parse(input io.Reader) (map[interface{}]interface{}, error) {
 
 func setParsed(inputParsed, partsParsed map[interface{}]interface{}) error {
 	for k, v := range inputParsed {
-		// Walk the YAML file recursively.
-		if reflect.ValueOf(v).Kind() == reflect.Map {
+		switch reflect.TypeOf(v).Kind() {
+		// Recurse into complex fields.
+		case reflect.Map:
 			if err := setParsed(v.(map[interface{}]interface{}), partsParsed); err != nil {
 				return err
 			}
+		// Set complex and scalar fields.
+		case reflect.Slice:
+			x := reflect.ValueOf(v)
+			for i := 0; i < x.Len(); i++ {
+				switch reflect.TypeOf(x.Index(i).Interface()).Kind() {
+				case reflect.Slice:
+					log.Println("implement support for slice of slices")
+				case reflect.Map:
+					if err := setParsed(x.Index(i).Interface().(map[interface{}]interface{}), partsParsed); err != nil {
+						return err
+					}
+				case reflect.String:
+					if err := setValue(v, v, inputParsed, partsParsed); err != nil {
+						return err
+					}
+				}
+			}
+		// Set scalar field.
+		default:
+			if err := setValue(k, v, inputParsed, partsParsed); err != nil {
+				return err
+			}
 		}
-
-		// Look for the SYAML_ prefix for the element value and if we don't have one,
-		// continue through the rest of the YAML file.
-		key, ok := isPlaceholder(v)
-		if !ok {
-			continue
-		}
-
-		// We've got a SYAML_ prefix. Find the part from the parts file and apply. If
-		// we don't have a part, return an error, as we'll never be able to complete
-		// this file.
-		part, ok := partsParsed[key]
-		if !ok {
-			return fmt.Errorf("missing part for %q", v)
-		}
-
-		inputParsed[k] = part
 	}
 
 	return nil
@@ -126,4 +132,19 @@ func isPlaceholder(value interface{}) (string, bool) {
 	}
 
 	return matches[1], true
+}
+
+func setValue(k, v interface{}, inputParsed, partsParsed map[interface{}]interface{}) error {
+	key, ok := isPlaceholder(v)
+	if !ok {
+		return nil
+	}
+
+	part, ok := partsParsed[key]
+	if !ok {
+		return fmt.Errorf("missing part for %q", v)
+	}
+
+	inputParsed[k] = part
+	return nil
 }

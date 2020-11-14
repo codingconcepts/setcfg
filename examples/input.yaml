@@ -1,4 +1,11 @@
-person:
-    name: Rob
-    favourite_shows: ~shows~
-    pet: ~pet~
+region: ~region~
+
+credentials:
+    username: ~username~
+    password: ~password~
+
+brokers:
+    - broker: ~broker-1~
+    - broker: ~broker-2~
+
+subnet_cidrs: ~subnet-cidrs~

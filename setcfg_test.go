@@ -13,44 +13,44 @@ func TestSet(t *testing.T) {
 	cases := []struct {
 		name   string
 		input  string
-		parts  string
+		env    string
 		exp    string
 		expErr error
 	}{
 		{
 			name:  "single level with no placeholders",
 			input: "a: b",
-			parts: "",
+			env:   "",
 			exp:   "a: b\n",
 		},
 		{
 			name:  "single level with no matching placeholders",
 			input: "a: b",
-			parts: "b: c",
+			env:   "b: c",
 			exp:   "a: b\n",
 		},
 		{
 			name:  "single level with nullifying placeholders",
 			input: "a: ~hello~",
-			parts: "hello:",
+			env:   "hello:",
 			exp:   "a: null\n",
 		},
 		{
 			name:  "single level with a matching placeholder - string",
 			input: "a: ~hello~",
-			parts: "hello: hi",
+			env:   "hello: hi",
 			exp:   "a: hi\n",
 		},
 		{
 			name:  "single level with a matching placeholder - list",
 			input: "a: ~hello~",
-			parts: "hello:\n- 1\n- 2",
+			env:   "hello:\n- 1\n- 2",
 			exp:   "a:\n- 1\n- 2\n",
 		},
 		{
 			name:  "single level with a matching placeholder - map",
 			input: "a: ~hello~",
-			parts: "hello:\n  one: 1\n  two: 2",
+			env:   "hello:\n  one: 1\n  two: 2",
 			exp:   "a:\n  one: 1\n  two: 2\n",
 		},
 	}
@@ -62,12 +62,12 @@ func TestSet(t *testing.T) {
 				t.Fatalf("error parsing input: %v", err)
 			}
 
-			parts, err := parse(strings.NewReader(c.parts))
+			env, err := parse(strings.NewReader(c.env))
 			if err != nil {
-				t.Fatalf("error parsing parts: %v", err)
+				t.Fatalf("error parsing env: %v", err)
 			}
 
-			err = setParsed(input, parts)
+			err = setParsed(input, env)
 			test.Equals(t, c.expErr, errors.Unwrap(err))
 			if err != nil {
 				return

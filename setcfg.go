@@ -31,11 +31,11 @@ func (fs *flagStrings) Set(value string) error {
 
 func main() {
 	input := flag.String("i", "", "Absolute or relative path to input YAML file.")
-	parts := flag.String("p", "", "Absolute or relative path to the parts YAML file.")
-	pattern := flag.String("pattern", "~(.*?)~", "The regex pattern to use for extracting part keys.")
+	env := flag.String("e", "", "Absolute or relative path to the environment YAML file.")
+	pattern := flag.String("pattern", "~(.*?)~", "The regex pattern to use for extracting keys.")
 
 	adhoc := &flagStrings{}
-	flag.Var(adhoc, "f", "A list of 'key=value' fields to substitute (useful as an alternative to -p if all you're substituting are simple fields).")
+	flag.Var(adhoc, "f", "A list of 'key=value' fields to substitute (useful as an alternative to -e if all you're substituting are simple fields).")
 
 	flag.Parse()
 
@@ -55,22 +55,22 @@ func main() {
 		log.Fatalf("error unmarshalling input file: %v", err)
 	}
 
-	partsParsed := map[interface{}]interface{}{}
-	if *parts != "" {
-		partsFile, err := os.Open(*parts)
+	envParsed := map[interface{}]interface{}{}
+	if *env != "" {
+		envFile, err := os.Open(*env)
 		if err != nil {
-			log.Fatalf("error reading input parts file: %v", err)
+			log.Fatalf("error reading input environment file: %v", err)
 		}
-		if partsParsed, err = parse(partsFile); err != nil {
-			log.Fatalf("error unmarshalling parts file: %v", err)
+		if envParsed, err = parse(envFile); err != nil {
+			log.Fatalf("error unmarshalling environment file: %v", err)
 		}
 	}
 
-	if err := addAdhocFields(partsParsed, adhoc); err != nil {
+	if err := addAdhocFields(envParsed, adhoc); err != nil {
 		log.Fatalf("error setting adhoc fields: %v", err)
 	}
 
-	if err := setParsed(inputParsed, partsParsed); err != nil {
+	if err := setParsed(inputParsed, envParsed); err != nil {
 		log.Fatalf("error setting file: %v", err)
 	}
 
@@ -86,7 +86,7 @@ func parse(input io.Reader) (map[interface{}]interface{}, error) {
 	var parsed map[interface{}]interface{}
 	err := yaml.NewDecoder(input).Decode(&parsed)
 
-	// If there aren't any parts, just return an empty collection.
+	// If there aren't any environment fields, just return an empty collection.
 	if err == io.EOF {
 		return map[interface{}]interface{}{}, nil
 	}
@@ -94,7 +94,7 @@ func parse(input io.Reader) (map[interface{}]interface{}, error) {
 	return parsed, err
 }
 
-func addAdhocFields(partsParsed map[interface{}]interface{}, adhoc *flagStrings) error {
+func addAdhocFields(envParsed map[interface{}]interface{}, adhoc *flagStrings) error {
 	if adhoc == nil {
 		return nil
 	}
@@ -105,7 +105,7 @@ func addAdhocFields(partsParsed map[interface{}]interface{}, adhoc *flagStrings)
 			return err
 		}
 
-		partsParsed[k] = v
+		envParsed[k] = v
 	}
 
 	return nil
@@ -120,12 +120,12 @@ func parseAdhocKeyValue(field string) (string, string, error) {
 	return parts[0], parts[1], nil
 }
 
-func setParsed(inputParsed, partsParsed map[interface{}]interface{}) error {
+func setParsed(inputParsed, envParsed map[interface{}]interface{}) error {
 	for k, v := range inputParsed {
 		switch reflect.TypeOf(v).Kind() {
 		// Recurse into complex fields.
 		case reflect.Map:
-			if err := setParsed(v.(map[interface{}]interface{}), partsParsed); err != nil {
+			if err := setParsed(v.(map[interface{}]interface{}), envParsed); err != nil {
 				return err
 			}
 		// Set complex and scalar fields.
@@ -136,18 +136,18 @@ func setParsed(inputParsed, partsParsed map[interface{}]interface{}) error {
 				case reflect.Slice:
 					log.Println("implement support for slice of slices")
 				case reflect.Map:
-					if err := setParsed(x.Index(i).Interface().(map[interface{}]interface{}), partsParsed); err != nil {
+					if err := setParsed(x.Index(i).Interface().(map[interface{}]interface{}), envParsed); err != nil {
 						return err
 					}
 				case reflect.String:
-					if err := setValue(v, v, inputParsed, partsParsed); err != nil {
+					if err := setValue(v, v, inputParsed, envParsed); err != nil {
 						return err
 					}
 				}
 			}
 		// Set scalar field.
 		default:
-			if err := setValue(k, v, inputParsed, partsParsed); err != nil {
+			if err := setValue(k, v, inputParsed, envParsed); err != nil {
 				return err
 			}
 		}
@@ -170,13 +170,13 @@ func isPlaceholder(value interface{}) (string, bool) {
 	return matches[1], true
 }
 
-func setValue(k, v interface{}, inputParsed, partsParsed map[interface{}]interface{}) error {
+func setValue(k, v interface{}, inputParsed, envParsed map[interface{}]interface{}) error {
 	key, ok := isPlaceholder(v)
 	if !ok {
 		return nil
 	}
 
-	part, ok := partsParsed[key]
+	part, ok := envParsed[key]
 	if !ok {
 		return fmt.Errorf("missing part for %q", v)
 	}

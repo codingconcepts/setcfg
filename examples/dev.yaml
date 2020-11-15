@@ -1,0 +1,16 @@
+region: eu-west-1
+
+username: admin
+password: supersecret
+
+broker-1:
+    host: https://localhost
+    port: 8001
+
+broker-2:
+    host: https://localhost
+    port: 8002
+
+subnet-cidrs:
+- 1.2.3.0/25
+- 1.2.3.128/25

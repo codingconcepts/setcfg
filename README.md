@@ -15,19 +15,19 @@ $ go get -u github.com/codingconcepts/setcfg
 **Help text**:
 ```
 setcfg -h
+  -e string
+        Absolute or relative path to the environment YAML file.
   -f value
-        A list of 'key=value' fields to substitute (useful as an alternative to -p if all you're substituting are simple fields).
+        A list of 'key=value' fields to substitute (useful as an alternative to -e if all you're substituting are simple fields).
   -i string
         Absolute or relative path to input YAML file.
-  -p string
-        Absolute or relative path to the parts YAML file.
   -pattern string
-        The regex pattern to use for extracting part keys. (default "~(.*?)~")
+        The regex pattern to use for extracting keys. (default "~(.*?)~")
 ```
 
 Example:
 
-The following command will place any placeholders found within input.yaml with parts found in parts.yaml:
+The following command will place any placeholders found within input.yaml with fields found in dev.yaml:
 
 **input.yaml**:
 ``` yaml
@@ -44,7 +44,7 @@ brokers:
 subnet_cidrs: ~subnet-cidrs~
 ```
 
-**parts.yaml**
+**dev.yaml**
 ``` yaml
 region: eu-west-1
 
@@ -65,7 +65,7 @@ subnet-cidrs:
 ```
 
 ```
-$ setcfg -i input.yaml -p parts.yaml
+$ setcfg -i input.yaml -e dev.yaml
 
 brokers:
 - broker:
@@ -83,9 +83,9 @@ subnet_cidrs:
 - 1.2.3.128/25
 ```
 
-You can set ad-hoc fields to override any fields in the parts file:
+You can set ad-hoc fields to override any fields in the env file:
 ```
-$ setcfg -i input.yaml -p parts.yaml -p region=eu-west-2
+$ setcfg -i input.yaml -e dev.yaml -f region=eu-west-2
 
 brokers:
 - broker:
@@ -107,10 +107,10 @@ subnet_cidrs:
 
 **Pipe to file**:
 ```
-$ setcfg -i input.yaml -p parts.yaml > output.yaml
+$ setcfg -i input.yaml -e dev.yaml > output.yaml
 ```
 
 **Pipe to kubectl apply**:
 ```
-$ setcfg -i input.yaml -p parts.yaml | kubectl apply -f -
+$ setcfg -i input.yaml -e dev.yaml | kubectl apply -f -
 ```

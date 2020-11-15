@@ -83,7 +83,7 @@ subnet_cidrs:
 - 1.2.3.128/25
 ```
 
-You can set ad-hoc fields to override any fields in the env file:
+You can set ad-hoc fields to add to, or override any fields in the env file:
 ```
 $ setcfg -i input.yaml -e dev.yaml -f region=eu-west-2
 

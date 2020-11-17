@@ -122,6 +122,10 @@ func parseAdhocKeyValue(field string) (string, string, error) {
 
 func setParsed(inputParsed, envParsed map[interface{}]interface{}) error {
 	for k, v := range inputParsed {
+		if v == nil {
+			continue
+		}
+
 		switch reflect.TypeOf(v).Kind() {
 		// Recurse into complex fields.
 		case reflect.Map:

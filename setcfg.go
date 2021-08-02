@@ -50,10 +50,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading input file: %v", err)
 	}
-	inputParsed, err := parse(inputFile)
-	if err != nil {
-		log.Fatalf("error unmarshalling input file: %v", err)
-	}
 
 	envParsed := map[interface{}]interface{}{}
 	if *env != "" {
@@ -70,16 +66,37 @@ func main() {
 		log.Fatalf("error setting adhoc fields: %v", err)
 	}
 
-	if err := setParsed(inputParsed, envParsed); err != nil {
-		log.Fatalf("error setting file: %v", err)
+	outputs := parseFile(inputFile, envParsed)
+	fmt.Println(outputs)
+}
+
+func parseFile(input io.Reader, env map[interface{}]interface{}) string {
+	decoder := yaml.NewDecoder(input)
+
+	outputs := []string{}
+	for {
+		var inputParsed map[interface{}]interface{}
+		if err := decoder.Decode(&inputParsed); err != nil {
+			if err == io.EOF {
+				break
+
+			}
+			log.Fatalf("reading yaml part in file: %v", err)
+		}
+
+		if err := setParsed(inputParsed, env); err != nil {
+			log.Fatalf("error setting file: %v", err)
+		}
+
+		output, err := yaml.Marshal(inputParsed)
+		if err != nil {
+			log.Fatalf("error marshalling output: %v", err)
+		}
+
+		outputs = append(outputs, (string(output)))
 	}
 
-	output, err := yaml.Marshal(inputParsed)
-	if err != nil {
-		log.Fatalf("error marshalling output: %v", err)
-	}
-
-	fmt.Println(string(output))
+	return strings.Join(outputs, "---\n")
 }
 
 func parse(input io.Reader) (map[interface{}]interface{}, error) {

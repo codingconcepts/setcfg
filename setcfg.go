@@ -129,7 +129,7 @@ func addAdhocFields(envParsed map[interface{}]interface{}, adhoc *flagStrings) e
 }
 
 func parseAdhocKeyValue(field string) (string, string, error) {
-	parts := strings.Split(field, "=")
+	parts := strings.SplitN(field, "=", 2)
 	if len(parts) < 2 {
 		return "", "", fmt.Errorf("adhoc fields must be in the format of key=value")
 	}

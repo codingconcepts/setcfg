@@ -64,6 +64,14 @@ func TestParse(t *testing.T) {
 			exp: "a: bye\n",
 		},
 		{
+			name:  "single level adhoc placeholder has trailing equals sign",
+			input: "password: ~password~",
+			adhocFields: &flagStrings{
+				"password=cGFzc3dvcmQxMjM0Cg==",
+			},
+			exp: "password: cGFzc3dvcmQxMjM0Cg==\n",
+		},
+		{
 			name:  "multi level with a matching placeholder - map",
 			input: "a:\n  b:\n    c: ~c~",
 			env:   "c:\n  one: 1\n  two: 2",
